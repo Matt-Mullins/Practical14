@@ -3,9 +3,6 @@
 //02 March 2026
 //Practical 14
 
-/* =======================
-   Node class
-   ======================= */
 class Node {
     String key;
     String data;
@@ -18,9 +15,6 @@ class Node {
     }
 }
 
-/* =======================
-   Open Hash Table
-   ======================= */
 class openHash {
 
     private Node[] table;
@@ -97,84 +91,85 @@ class openHash {
         }
         return null;
     }
-}
+    class chainedHash {
+        private Node[] table;
+        private int m;
 
-/* =======================
-   Chained Hash Table
-   ======================= */
-class chainedHash {
-
-    private Node[] table;
-    private int m;
-
-    chainedHash(int m) {
-        this.m = m;
-        table = new Node[m + 1];   // indices 1..m
-    }
-
-    int hash(String key) {
-        int h = Math.abs(key.hashCode());
-        return (h % m) + 1;
-    }
-
-    boolean isEmpty() {
-        for (int i = 1; i <= m; i++)
-            if (table[i] != null) return false;
-        return true;
-    }
-
-    boolean isInTable(String key) {
-        return lookup(key) != null;
-    }
-
-    void insert(String key, String data) {
-        int i = hash(key);
-
-        if (table[i] == null) {
-            table[i] = new Node(key, data);
-            return;
+        chainedHash(int m) {
+            this.m = m;
+            table = new Node[m + 1];   // indices 1..m
         }
 
-        Node curr = table[i];
-        while (true) {
-            if (curr.key.equals(key)) {
-                curr.data = data;
+        int hash(String key) {
+            int h = Math.abs(key.hashCode());
+            return (h % m) + 1;
+        }
+
+        boolean isEmpty() {
+            for (int i = 1; i <= m; i++)
+                if (table[i] != null) return false;
+            return true;
+        }
+
+        boolean isInTable(String key) {
+            return lookup(key) != null;
+        }
+
+        void insert(String key, String data) {
+            int i = hash(key);
+
+            if (table[i] == null) {
+                table[i] = new Node(key, data);
                 return;
             }
-            if (curr.next == null) break;
-            curr = curr.next;
-        }
-        curr.next = new Node(key, data);
-    }
 
-    String lookup(String key) {
-        int i = hash(key);
-        Node curr = table[i];
-
-        while (curr != null) {
-            if (curr.key.equals(key))
-                return curr.data;
-            curr = curr.next;
-        }
-        return null;
-    }
-
-    String remove(String key) {
-        int i = hash(key);
-        Node curr = table[i];
-        Node prev = null;
-
-        while (curr != null) {
-            if (curr.key.equals(key)) {
-                if (prev == null)
-                    table[i] = curr.next;
-                else
-                    prev.next = curr.next;
-                return curr.data;
+            Node curr = table[i];
+            while (true) {
+                if (curr.key.equals(key)) {
+                    curr.data = data;
+                    return;
+                }
+                if (curr.next == null) break;
+                curr = curr.next;
             }
-            prev = curr;
-            curr = curr.next;
+            curr.next = new Node(key, data);
         }
-        return null;
+
+        String lookup(String key) {
+            int i = hash(key);
+            Node curr = table[i];
+
+            while (curr != null) {
+                if (curr.key.equals(key))
+                    return curr.data;
+                curr = curr.next;
+            }
+            return null;
+        }
+
+        String remove(String key) {
+            int i = hash(key);
+            Node curr = table[i];
+            Node prev = null;
+
+            while (curr != null) {
+                if (curr.key.equals(key)) {
+                    if (prev == null)
+                        table[i] = curr.next;
+                    else
+                        prev.next = curr.next;
+                    return curr.data;
+                }
+                prev = curr;
+                curr = curr.next;
+            }
+            return null;
+        }
     }
+
+    
+
+
 }
+
+
