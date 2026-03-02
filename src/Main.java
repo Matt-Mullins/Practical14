@@ -3,82 +3,178 @@
 //02 March 2026
 //Practical 14
 
-
-import java.io.*;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-void main() {
-    /* =======================
-    File: KeyValue.java
+/* =======================
+   Node class
    ======================= */
+class Node {
+    String key;
+    String data;
+    Node next;
 
-    class Node {
-        int key;
-        String data;
-        Node next;
+    Node(String key, String data) {
+        this.key = key;
+        this.data = data;
+        this.next = null;
+    }
+}
 
-        Node(int key, String data) {
-            this.key = key;
-            this.data = data;
-            this.next = null;
-        }
+/* =======================
+   Open Hash Table
+   ======================= */
+class openHash {
+
+    private Node[] table;
+    private int m;
+    private int size;
+
+    openHash(int m) {
+        this.m = m;
+        table = new Node[m + 1];   // indices 1..m
+        size = 0;
     }
 
-    class Openhash {
-        private Node[] table;
-        private int m;
-        private int size;
+    int hash(String key) {
+        int h = Math.abs(key.hashCode());
+        return (h % m) + 1;
+    }
 
-        OpenHash(int m ){
-            this.m =m;
-            table = new Node[m+1];
-            size = 0;
-        }
-        int hash(String key){
-            int h = Math.abs(key.hashCode());
-            return (h % m ) +1;
-        }
+    boolean isFull() {
+        return size >= m;
+    }
 
-        static Node linearSearch(Node[] arr, int key) {
-            for (Node n : arr) {
-                if (n.key == key)
-                    return n;
+    boolean isEmpty() {
+        return size == 0;
+    }
+
+    boolean isInTable(String key) {
+        return lookup(key) != null;
+    }
+
+    void insert(String key, String data) {
+        if (isFull()) return;
+
+        int i = hash(key);
+        int step = 1;
+
+        while (table[i] != null) {
+            if (table[i].key.equals(key)) {
+                table[i].data = data;
+                return;
             }
-            return null;
+            i = ((i + step) % m) + 1;
+            step++;
+        }
+        table[i] = new Node(key, data);
+        size++;
+    }
+
+    String lookup(String key) {
+        int i = hash(key);
+        int step = 1;
+
+        while (table[i] != null) {
+            if (table[i].key.equals(key))
+                return table[i].data;
+            i = ((i + step) % m) + 1;
+            step++;
+        }
+        return null;
+    }
+
+    String remove(String key) {
+        int i = hash(key);
+        int step = 1;
+
+        while (table[i] != null) {
+            if (table[i].key.equals(key)) {
+                String val = table[i].data;
+                table[i] = null;
+                size--;
+                return val;
+            }
+            i = ((i + step) % m) + 1;
+            step++;
+        }
+        return null;
+    }
+}
+
+/* =======================
+   Chained Hash Table
+   ======================= */
+class chainedHash {
+
+    private Node[] table;
+    private int m;
+
+    chainedHash(int m) {
+        this.m = m;
+        table = new Node[m + 1];   // indices 1..m
+    }
+
+    int hash(String key) {
+        int h = Math.abs(key.hashCode());
+        return (h % m) + 1;
+    }
+
+    boolean isEmpty() {
+        for (int i = 1; i <= m; i++)
+            if (table[i] != null) return false;
+        return true;
+    }
+
+    boolean isInTable(String key) {
+        return lookup(key) != null;
+    }
+
+    void insert(String key, String data) {
+        int i = hash(key);
+
+        if (table[i] == null) {
+            table[i] = new Node(key, data);
+            return;
         }
 
-        static Node binarySearch(Node[] arr, int key) {
-            int left = 0, right = arr.length - 1;
+        Node curr = table[i];
+        while (true) {
+            if (curr.key.equals(key)) {
+                curr.data = data;
+                return;
+            }
+            if (curr.next == null) break;
+            curr = curr.next;
+        }
+        curr.next = new Node(key, data);
+    }
 
-            while (left <= right) {
-                int mid = (left + right) / 2;
+    String lookup(String key) {
+        int i = hash(key);
+        Node curr = table[i];
 
-                if (arr[mid].key == key)
-                    return arr[mid];
-                else if (arr[mid].key < key)
-                    left = mid + 1;
+        while (curr != null) {
+            if (curr.key.equals(key))
+                return curr.data;
+            curr = curr.next;
+        }
+        return null;
+    }
+
+    String remove(String key) {
+        int i = hash(key);
+        Node curr = table[i];
+        Node prev = null;
+
+        while (curr != null) {
+            if (curr.key.equals(key)) {
+                if (prev == null)
+                    table[i] = curr.next;
                 else
-                    right = mid - 1;
+                    prev.next = curr.next;
+                return curr.data;
             }
-            return null;
+            prev = curr;
+            curr = curr.next;
         }
-
-        static Node[] loadFile(String filename) throws Exception {
-            BufferedReader br = new BufferedReader(new FileReader(filename));
-            ArrayList<Node> list = new ArrayList<>();
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split("\\s+", 2);
-                int key = Integer.parseInt(parts[0]);
-                String data = parts.length > 1 ? parts[1] : "";
-                list.add(new Node(key, data));
-            }
-            br.close();
-
-            return list.toArray(new Node[0]);
-        }
+        return null;
     }
 }
