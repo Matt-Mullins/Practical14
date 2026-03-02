@@ -3,6 +3,11 @@
 //02 March 2026
 //Practical 14
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.*;
+
 class Node {
     String key;
     String data;
@@ -14,7 +19,6 @@ class Node {
         this.next = null;
     }
 }
-
 class openHash {
 
     private Node[] table;
@@ -91,6 +95,7 @@ class openHash {
         }
         return null;
     }
+
     class chainedHash {
         private Node[] table;
         private int m;
@@ -146,7 +151,6 @@ class openHash {
             }
             return null;
         }
-
         String remove(String key) {
             int i = hash(key);
             Node curr = table[i];
@@ -167,9 +171,64 @@ class openHash {
         }
     }
 
-    
+    public class HashTiming {
 
+        static final int N = 1 << 20;        // 2^20
+        static final int USE = 950000;
+        static final int repetitions = 30;
 
+        public static void main(String[] args) {
+
+            String[] keys = new String[N];
+            for (int i = 0; i < N; i++)
+                keys[i] = Integer.toString(i + 1);
+
+            List<String> list = Arrays.asList(keys);
+            Collections.shuffle(list);
+
+            double[] alpha = {0.75, 0.80, 0.85, 0.90, 0.95};
+
+            System.out.println("Load\tN\tOpenHash(s)\tChainedHash(s)");
+
+            for (double a : alpha) {
+
+                int n = (int) (a * USE);
+                int m = n + 1;
+
+                double openTime = 0;
+                double chainTime = 0;
+
+                for (int r = 0; r < repetitions; r++) {
+
+                    openHash oh = new openHash(m);
+                    chainedHash ch = new chainedHash(m);
+
+                    for (int i = 0; i < n; i++) {
+                        oh.insert(list.get(i), list.get(i));
+                        ch.insert(list.get(i), list.get(i));
+                    }
+
+                    long start = System.currentTimeMillis();
+                    for (int i = 0; i < n; i++)
+                        oh.lookup(list.get(i));
+                    long finish = System.currentTimeMillis();
+                    openTime += (finish - start) / 1000.0;
+
+                    start = System.currentTimeMillis();
+                    for (int i = 0; i < n; i++)
+                        ch.lookup(list.get(i));
+                    finish = System.currentTimeMillis();
+                    chainTime += (finish - start) / 1000.0;
+                }
+                System.out.printf(
+                        "%.2f\t%d\t%.4f\t\t%.4f\n",
+                        a, n,
+                        openTime / repetitions,
+                        chainTime / repetitions
+                );
+            }
+        }
+    }
 }
 
 
